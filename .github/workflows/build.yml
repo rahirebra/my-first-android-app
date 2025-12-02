@@ -1,0 +1,64 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3
+      
+    - name: ⚙️ Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: 🤖 Setup Android SDK
+      uses: android-actions/setup-android@v2
+      
+    - name: 🔧 Make gradlew executable
+      run: chmod +x ./gradlew
+      
+    - name: 🏗️ Build Debug APK
+      run: ./gradlew assembleDebug
+      
+    - name: 📦 Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: MyFirstApp-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
+        
+    - name: 🚀 Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: app/build/outputs/apk/debug/app-debug.apk
+        tag_name: v1.0.${{ github.run_number }}
+        name: Version 1.0.${{ github.run_number }}
+        body: |
+          ## 🎉 My First Android App Built on GitHub!
+          
+          ### Features:
+          - ✅ Tap counter game
+          - ✅ Color changing background
+          - ✅ Built 100% on GitHub web
+          - ✅ No Android Studio needed
+          
+          ### 📲 How to Install:
+          1. Download the APK below
+          2. Enable "Install from unknown sources"
+          3. Open the APK file
+          4. Tap "Install"
+          
+          ### 🎮 Game Rules:
+          - Tap to increase counter
+          - Long press to reset
+          - Reach 50 to win!
+          
+          **Built by a beginner developer!** 🚀
+        draft: false
