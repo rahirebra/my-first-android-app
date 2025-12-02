@@ -10,33 +10,58 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout code
+    # 1. Get the code
+    - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: ⚙️ Setup Java
+    # 2. Setup Java
+    - name: Setup Java JDK
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         
-    - name: 🔧 Setup Android SDK
+    # 3. Setup Android
+    - name: Setup Android SDK
       uses: android-actions/setup-android@v3
-        
-    - name: 🏗️ Build Debug APK
-      run: |
-        # Accept licenses first
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        
-        # Build the APK
-        ./gradlew assembleDebug --stacktrace
       
-    - name: 📦 Upload APK
+    # 4. Accept Android licenses
+    - name: Accept Android Licenses
+      run: |
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        
+    # 5. Make gradlew executable
+    - name: Make gradlew executable
+      run: |
+        chmod +x gradlew
+        ls -la gradlew  # Verify permissions
+        
+    # 6. Debug: Show what's in directory
+    - name: Show directory structure
+      run: |
+        echo "Current directory:"
+        pwd
+        echo "Files in root:"
+        ls -la
+        echo "Files in gradle/wrapper:"
+        ls -la gradle/wrapper/ || echo "No gradle wrapper dir"
+        
+    # 7. Build the APK
+    - name: Build APK
+      run: |
+        ./gradlew tasks || true  # Show available tasks
+        ./gradlew assembleDebug --stacktrace
+        
+    # 8. Upload APK
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: MyFirstApp-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: app/build/outputs/apk/debug/*.apk
+        retention-days: 7
         
-    - name: 🚀 Create Release
+    # 9. Create Release
+    - name: Create GitHub Release
       if: success()
       uses: softprops/action-gh-release@v1
       with:
@@ -44,16 +69,18 @@ jobs:
         tag_name: v1.0.${{ github.run_number }}
         name: Release v1.0.${{ github.run_number }}
         body: |
-          ## 🎉 Android App Built on GitHub!
+          ## 🎉 My First Android App!
           
-          Download and install on your Android device!
+          Built entirely on GitHub web interface!
+          
+          **How to install:**
+          1. Download APK below
+          2. Enable "Install from unknown sources" in Android settings
+          3. Open APK and install
+          4. Launch app and enjoy!
           
           **Features:**
           - Tap counter game
-          - Color changing background
+          - Color-changing background
+          - Material Design UI
           - Built without Android Studio
-          
-          **How to Install:**
-          1. Enable "Install from unknown sources"
-          2. Download APK
-          3. Open and install
