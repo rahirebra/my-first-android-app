@@ -1,0 +1,21 @@
+# Android specific
+*.apk
+*.ap_
+*.aab
+*.jar
+*.keystore
+
+# Build files
+/build/
+.gradle/
+/local.properties
+
+# IDE files
+.idea/
+*.iml
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
